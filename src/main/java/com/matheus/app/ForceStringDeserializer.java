@@ -13,7 +13,9 @@ public class ForceStringDeserializer extends JsonDeserializer<String> {
     @Override
     public String deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         if (!JsonToken.VALUE_STRING.equals(jsonParser.getCurrentToken())) {
-            throw new JsonMappingException(jsonParser, "Erro ao converter, valor numerico em campo de string");
+
+            throw new IllegalArgumentException("erro-string");
+            // throw new JsonMappingException(jsonParser, "Erro ao converter, valor numerico em campo de string");
         } else {
             return jsonParser.getValueAsString();
         }
