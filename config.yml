@@ -1,0 +1,16 @@
+jdbc:
+  driver: org.postgresql.Driver
+  url: jdbc:postgresql://localhost:5432/root?schema=public
+  username: postgres
+  password: 2309
+  port: 5432
+  options: loglevel=1
+
+hibernate:
+  dialect: org.hibernate.dialect.PostgreSQL9Dialect
+  show_sql: false
+  hbm2ddl:
+    auto: create
+
+on:
+  port: 9999
