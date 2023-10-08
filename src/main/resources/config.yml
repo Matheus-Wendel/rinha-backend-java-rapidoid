@@ -8,9 +8,9 @@ jdbc:
 
 hibernate:
   dialect: org.hibernate.dialect.PostgreSQL9Dialect
-  show_sql: false
+  show_sql: true
   hbm2ddl:
     auto: create
 
 on:
-  port: 9999
+  port: 3000
