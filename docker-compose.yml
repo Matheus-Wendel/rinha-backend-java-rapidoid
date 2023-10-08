@@ -12,3 +12,42 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "2309"
       POSTGRES_DB: "root"
+  # api1:
+  #   # API - Instância 01
+  #   image: matheuswendel/rinha-backend-java
+  #   depends_on:
+  #     - db
+  #   expose:
+  #     - "3000"
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "0.15"
+  #         memory: "0.5GB"
+
+  # api2:
+  #   # API - Instância 02
+  #   image: matheuswendel/rinha-backend-java
+  #   depends_on:
+  #     - db
+  #   expose:
+  #     - "3000"
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "0.15"
+  #         memory: "0.5GB"
+
+  # nginx:
+  #   # Load Balancer
+  #   image: pablowinck/custom-ngnix:1.0
+  #   depends_on:
+  #     - api1
+  #     - api2
+  #   ports:
+  #     - "9999:9999"
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "0.15"
+  #         memory: "0.3GB"
