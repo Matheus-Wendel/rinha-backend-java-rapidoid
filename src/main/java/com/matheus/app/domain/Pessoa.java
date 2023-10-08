@@ -9,8 +9,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.apache.commons.validator.GenericValidator;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.matheus.app.ForceStringDeserializer;
 
 @Entity
 public class Pessoa {
@@ -24,22 +28,27 @@ public class Pessoa {
     public UUID id;
 
     @NotNull
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, unique = true, length = 32)
+    @Size(max = 32)
+    @JsonDeserialize(using = ForceStringDeserializer.class)
     public String apelido;
     @NotNull
     @Column(nullable = false, length = 100)
+    @Size(max = 100)
+    @JsonDeserialize(using = ForceStringDeserializer.class)
     public String nome;
     @NotNull
+    @JsonDeserialize(using = ForceStringDeserializer.class)
     public String nascimento;
     @NotNull
-    @Column(nullable = false, length = 100)
+    @Column(nullable = true, length = 100)
     private String stack;
 
     public Set<String> getStack() {
         if (stack == null) {
             return null;
         }
-        return new HashSet(Arrays.asList(stack.split(",")));
+        return new HashSet<String>(Arrays.asList(stack.split(",")));
 
     }
 
@@ -53,7 +62,7 @@ public class Pessoa {
 
     public boolean validate() {
 
-        if (stack == null || !GenericValidator.isDate(nascimento, FORMATO_DATA, true)) {
+        if (!GenericValidator.isDate(nascimento, FORMATO_DATA, true)) {
             return false;
         }
         return true;

@@ -4,11 +4,11 @@ import java.util.UUID;
 
 import org.rapidoid.annotation.Valid;
 import org.rapidoid.http.Req;
-import org.rapidoid.http.Resp;
-import org.rapidoid.job.Jobs;
 import org.rapidoid.jpa.JPA;
+import org.rapidoid.setup.My;
 import org.rapidoid.setup.On;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.matheus.app.domain.Pessoa;
 
 public class Server {
@@ -19,24 +19,30 @@ public class Server {
 
         String[] s = { "com.matheus.app" };
         JPA.bootstrap(s, Pessoa.class);
+
         On.post("/pessoas").json((Req req, @Valid Pessoa p) -> cadastrarPessoa(req, p));
         On.get("/pessoas").json((Req req, String t) -> consultaPessoaPorParametro(req));
         On.get("/pessoas/{id}").json((String id) -> consultaId(id));
         On.get("/contagem-pessoas").json((Req req) -> contagemPessoas());
+
+        My.errorHandler((req, resp, error) -> {
+            return resp.code(422).result("Error: " + error.getMessage());
+
+        });
         // On.post("/hello").plain((Req req, Resp resp, Pessoa p) -> {
 
-        //     req.async(); // mark asynchronous request processing
+        // req.async(); // mark asynchronous request processing
 
-        //     // send part 1
-        //     // resp.chunk("part 1".getBytes());
+        // // send part 1
+        // // resp.chunk("part 1".getBytes());
 
-        //     resp.json(p);
-        //     resp.done();
-        //     // after some time, send part 2 and finish
-        //     Jobs.after(1000).milliseconds(() -> {
-        //         System.out.println("oi");
-        //     });
-        //     return resp;
+        // resp.json(p);
+        // resp.done();
+        // // after some time, send part 2 and finish
+        // Jobs.after(1000).milliseconds(() -> {
+        // System.out.println("oi");
+        // });
+        // return resp;
 
         // });
 
@@ -54,7 +60,7 @@ public class Server {
         return JPA.get(Pessoa.class, uuid);
     }
 
-    private Pessoa cadastrarPessoa(Req req, Pessoa p) {
+    private Object cadastrarPessoa(Req req, Pessoa p) {
 
         // System.out.println("pessoa");
         // System.out.println(p);
@@ -62,7 +68,11 @@ public class Server {
 
         // System.out.println(req.data());
         p.id = UUID.randomUUID();
-        JPA.save(p);
+        if (!p.validate()) {
+            return req.response().result("e").code(400);
+        }
+        Pessoa save = JPA.save(p);
+        req.response().json(save).code(201);
         return p;
     }
 
