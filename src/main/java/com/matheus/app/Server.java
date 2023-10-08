@@ -4,11 +4,12 @@ import java.util.UUID;
 
 import org.rapidoid.annotation.Valid;
 import org.rapidoid.http.Req;
+import org.rapidoid.http.Resp;
+import org.rapidoid.job.Jobs;
 import org.rapidoid.jpa.JPA;
 import org.rapidoid.setup.My;
 import org.rapidoid.setup.On;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.matheus.app.domain.Pessoa;
 
 public class Server {
@@ -20,29 +21,38 @@ public class Server {
         String[] s = { "com.matheus.app" };
         JPA.bootstrap(s, Pessoa.class);
 
-        On.post("/pessoas").json((Req req, @Valid Pessoa p) -> cadastrarPessoa(req, p));
+        On.post("/pessoas").json((Req req, @Valid Pessoa p) -> cadastrarPessoa(req,
+        p));
         On.get("/pessoas").json((Req req, String t) -> consultaPessoaPorParametro(req));
         On.get("/pessoas/{id}").json((String id) -> consultaId(id));
         On.get("/contagem-pessoas").json((Req req) -> contagemPessoas());
 
         My.errorHandler((req, resp, error) -> {
-            return resp.code(422).result("Error: " + error.getMessage());
+
+            if (error.getCause() instanceof IllegalArgumentException) {
+                return resp.code(400).json(new Error("erro formato prop"));
+
+            }
+            return resp.code(422).json(new Error(error.getMessage()));
 
         });
-        // On.post("/hello").plain((Req req, Resp resp, Pessoa p) -> {
+        // On.post("/pessoas").plain((Req req, Resp resp, Pessoa p) -> {
 
-        // req.async(); // mark asynchronous request processing
+        //     req.async(); // mark asynchronous request processing
 
-        // // send part 1
-        // // resp.chunk("part 1".getBytes());
-
-        // resp.json(p);
-        // resp.done();
-        // // after some time, send part 2 and finish
-        // Jobs.after(1000).milliseconds(() -> {
-        // System.out.println("oi");
-        // });
-        // return resp;
+        //     // send part 1
+        //     // resp.chunk("part 1".getBytes());
+        //     if (p.validate()) {
+        //         return req.response().result("e").code(400);
+        //     }
+        //     p.id = UUID.randomUUID();
+        //     resp.json(p);
+        //     resp.done();
+        //     // after some time, send part 2 and finish
+        //     Jobs.after(1).milliseconds(() -> {
+        //         System.out.println(p);
+        //     });
+        //     return resp;
 
         // });
 
@@ -68,12 +78,12 @@ public class Server {
 
         // System.out.println(req.data());
         p.id = UUID.randomUUID();
-        if (!p.validate()) {
+        if (p.validate()) {
             return req.response().result("e").code(400);
         }
-        Pessoa save = JPA.save(p);
-        req.response().json(save).code(201);
-        return p;
+        JPA.save(p);
+        return req.response().header("Location", p.id.toString()).json(p).code(201);
+
     }
 
     private Object consultaPessoaPorParametro(Req req) {
@@ -89,6 +99,6 @@ public class Server {
             return req.response().result("e").code(400);
 
         }
-
     }
+
 }
